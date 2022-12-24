@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
+
+// User model
+const user = require('../models/User');
 
 // Login page
 router.get('/login', (req, res) => res.render('login'));
@@ -37,8 +41,29 @@ router.post('/register', (req, res) => {
                 password2
             });
         } else {
-            // const { message } = await register(email, password);
-            return res.send( "User registered" );
+            // validation
+            user.findOne({ email: email })
+               .then(user => {
+                    if (user) {
+                        errors.push( { msg: 'Email already registered'});
+                        res.render('register', {
+                            errors,
+                            name,
+                            email,
+                            password,
+                            password2
+                        });
+                    } else {
+                        const newUser = new User({
+                            name,
+                            email,
+                            password
+                        });
+                        
+                        console.log(newUser);
+                        res.send("Registered");
+                    }
+                });
         }  
     } catch (error) {
         return res.send('Encountered Error while registering: ' + error);  
